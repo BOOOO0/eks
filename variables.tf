@@ -25,7 +25,7 @@ variable "t3_medium" {
 variable "azs" {
   description = "A list of availability zones names or ids in the region"
   type = list(string)
-  default = ["ap-northeast-2a", "ap-northeast-2b", "ap-northeast-2c", "ap-northeast-2d"]
+  default = ["ap-northeast-2a", "ap-northeast-2c"]
 }
 
 variable "cluster_name" {
