@@ -16,15 +16,30 @@
 
 - ![image](./img/DeployWithHelm.png)
 
-- Helm Chart를 사용해서 어플리케이션을 배포했습니다.
-
-- 기본 값들을 그대로 두고 values.yml의 image 항목만 미리 도커 허브에 push해둔 이미지를 명시해서 배포를 진행했습니다.
+- Helm Chart를 사용해서 어플리케이션을 배포했습니다. 작성한 values.yaml은 다음과 같습니다.
 
 ```yaml
+replicaCount: 2
+
 image:
   repository: boooo0/api_server
   pullPolicy: IfNotPresent
   tag: v1.0
+
+service:
+  type: LoadBalancer
+  port: 80
+
+serviceAccount:
+  create: true
+  name: ""
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
 ```
 
 # Terraform
