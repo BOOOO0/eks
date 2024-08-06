@@ -16,31 +16,13 @@
 
 - ![image](./img/DeployWithHelm.png)
 
-- Helm Chart를 사용해서 어플리케이션을 배포했습니다. 작성한 values.yaml은 다음과 같습니다.
+- Helm Chart를 사용해서 어플리케이션을 배포했습니다. 
 
-```yaml
-replicaCount: 2
+- Helm으로 어플리케이션을 배포해보는 것은 처음이었기 때문에 배포 과정은 VPC 내부에 있는 마스터 노드에서 `helm create api-server`명령어로 디렉토리를 생성한 후 values.yaml 부분만 수정하고 `helm install api-server ./api-server`명령어로 배포를 진행했습니다.
 
-image:
-  repository: boooo0/api_server
-  pullPolicy: IfNotPresent
-  tag: v1.0
+- values.yaml에서 수정한 부분은 배포에 대한 내용으로 배포할 이미지 이름, Replica의 수, Service의 타입과 포트 번호로 Ingress, Pod Autoscailing 등의 추가적인 구성은 하지 않았습니다.
 
-service:
-  type: LoadBalancer
-  port: 80
-
-serviceAccount:
-  create: true
-  name: ""
-
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 80
-
-```
+- 클러스터는 두개의 워커 노드로 구성되어 있고 크기가 2인 replicaSet을 가지는 Deployment로 구성되어 각 노드에 파드가 한개씩 실행됩니다.
 
 # Terraform
 
@@ -55,6 +37,51 @@ autoscaling:
 # 모니터링
 
 - Helm을 사용해서 Prometheus + Grafana를 설치하고 모니터링을 구축했습니다.
+
+- 구축 과정은 VPC 내에 있는 마스터 노드에서 Helm repo를 추가하여 설치했고 설치 과정에서 기본적인 설치 튜토리얼 외 별도의 추가 설정은 없었으며 클러스터 내의 전체 리소스의 사용량에 대한 모니터링을 구성하였습니다.
+
+- 어플리케이션을 특정하여 모니터링을 구성하거나 알람 설정과 같은 추가적인 작업은 하지 않았습니다.
+
+```bash
+# add prometheus Helm repo
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+# add grafana Helm repo
+helm repo add grafana https://grafana.github.io/helm-charts
+
+# 프로메테우스 설치
+kubectl create namespace prometheus
+helm install prometheus prometheus-community/prometheus \
+--namespace prometheus \
+--set alertmanager.persistentVolume.storageClass="gp2" \
+--set server.persistentVolume.storageClass="gp2"
+
+# 프로메테우스가 수집하는 데이터를 grafana의 datasource로 명시
+mkdir ${HOME}/grafana
+
+cat << EoF > ${HOME}/grafana/grafana.yaml
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      url: http://prometheus-server.prometheus.svc.cluster.local
+      access: proxy
+      isDefault: true
+EoF
+
+# 그라파나 설치
+kubectl create namespace grafana
+helm install grafana grafana/grafana \
+    --namespace grafana \
+    --set persistence.storageClassName="gp2" \
+    --set persistence.enabled=true \
+    --set adminPassword='Mon!tor123' \
+    --values ${HOME}/grafana/grafana.yaml \
+    --set service.type=LoadBalancer
+
+```
 
 - 대시보드는 Grafana에서 기본으로 제공되는 대시보드를 Import해서 EKS 클러스터 내 모든 파드, 컨테이너의 CPU, 메모리, 스토리지, 네트워크 I/O를 모니터링 할 수 있도록 했습니다.
 
