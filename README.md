@@ -18,7 +18,7 @@
 
 - Helm Chart를 사용해서 어플리케이션을 배포했습니다. 
 
-- Helm으로 어플리케이션을 배포해보는 것은 처음이었기 때문에 배포 과정은 VPC 내부에 있는 마스터 노드에서 `helm create api-server`명령어로 디렉토리를 생성한 후 values.yaml 부분만 수정하고 `helm install api-server ./api-server`명령어로 배포를 진행했습니다.
+- 배포 과정은 VPC 내부에 있는 마스터 노드에서 `helm create api-server`명령어로 디렉토리를 생성한 후 values.yaml 부분만 수정하고 `helm install api-server ./api-server`명령어로 배포를 진행했습니다.
 
 - values.yaml에서 수정한 부분은 배포에 대한 내용으로 배포할 이미지 이름, Replica의 수, Service의 타입과 포트 번호로 Ingress, Pod Autoscailing 등의 추가적인 구성은 하지 않았습니다.
 
@@ -38,7 +38,7 @@
 
 - Helm을 사용해서 Prometheus + Grafana를 설치하고 모니터링을 구축했습니다.
 
-- 구축 과정은 VPC 내에 있는 마스터 노드에서 Helm repo를 추가하여 설치했고 설치 과정에서 기본적인 설치 튜토리얼 외 별도의 추가 설정은 없었으며 클러스터 내의 전체 리소스의 사용량에 대한 모니터링을 구성하였습니다.
+- 구축 과정은 VPC 내에 있는 마스터 노드에서 명령어를 사용하여 설치했고 클러스터 내의 전체 리소스의 사용량에 대한 모니터링을 구성하였습니다.
 
 - 어플리케이션을 특정하여 모니터링을 구성하거나 알람 설정과 같은 추가적인 작업은 하지 않았습니다.
 
